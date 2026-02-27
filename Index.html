@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BoiGyaniPrinters - A1 Printing And Binding</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --primary:#1e3a8a;
+  --accent:#2563eb;
+  --light:#f3f4f6;
+  --dark:#111827;
+  --white:#ffffff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+body{background:var(--light);color:var(--dark);}
+
+header{
+  background:var(--primary);
+  color:var(--white);
+  padding:15px;
+  text-align:center;
+}
+
+header h1{font-size:22px;}
+header p{font-size:14px;opacity:0.9;}
+
+.container{padding:15px;}
+
+.filters{
+  display:flex;
+  overflow-x:auto;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.filters button{
+  padding:8px 14px;
+  border:none;
+  border-radius:20px;
+  background:var(--white);
+  cursor:pointer;
+  font-size:13px;
+  white-space:nowrap;
+}
+
+.filters button.active{
+  background:var(--accent);
+  color:var(--white);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:var(--white);
+  border-radius:10px;
+  padding:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  display:flex;
+  flex-direction:column;
+  transition:0.2s;
+}
+
+.card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+.card h3{font-size:14px;margin:8px 0;}
+.card p{font-size:13px;color:gray;}
+.card .price{font-weight:600;margin:5px 0;}
+
+.card button{
+  margin-top:auto;
+  padding:8px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.cart-icon{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--accent);
+  color:white;
+  padding:12px 16px;
+  border-radius:50px;
+  cursor:pointer;
+  font-weight:600;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+}
+
+.cart-modal{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.cart-content{
+  background:white;
+  width:100%;
+  max-width:500px;
+  max-height:90%;
+  overflow-y:auto;
+  border-radius:10px;
+  padding:15px;
+}
+
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+.qty-controls button{
+  padding:3px 7px;
+  border:none;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+}
+
+.total{
+  font-weight:700;
+  margin-top:10px;
+}
+
+form input, form textarea{
+  width:100%;
+  padding:8px;
+  margin-top:8px;
+  margin-bottom:8px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+
+form button{
+  width:100%;
+  padding:10px;
+  border:none;
+  background:var(--primary);
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.whatsapp{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  background:#25D366;
+  color:white;
+  padding:12px 16px;
+  border-radius:50px;
+  text-decoration:none;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>BoiGyaniPrinters</h1>
+  <p>A1 Printing And Binding | Kolkata, Airport</p>
+</header>
+
+<div class="container">
+
+<div class="filters">
+  <button class="active" onclick="filterCategory('all')">All</button>
+  <button onclick="filterCategory('Dimai')">Dimai</button>
+  <button onclick="filterCategory('A4')">A4</button>
+  <button onclick="filterCategory('Crown')">Crown</button>
+  <button onclick="filterCategory('Magazine')">Magazine</button>
+  <button onclick="filterCategory('Newspaper')">Newspaper</button>
+</div>
+
+<div class="grid" id="productGrid"></div>
+
+</div>
+
+<div class="cart-icon" onclick="openCart()">
+🛒 Cart (<span id="cartCount">0</span>)
+</div>
+
+<a class="whatsapp" href="https://wa.me/917980063518" target="_blank">
+Chat on WhatsApp
+</a>
+
+<div class="cart-modal" id="cartModal">
+<div class="cart-content">
+<h3>Your Cart</h3>
+<div id="cartItems"></div>
+<div class="total" id="grandTotal"></div>
+
+<hr>
+
+<form id="orderForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+<input type="hidden" name="order_summary" id="orderSummary">
+
+<input type="text" name="customer_name" placeholder="Customer Name" required>
+<input type="tel" name="phone" placeholder="Phone Number" required>
+<textarea name="address" placeholder="Delivery Address" required></textarea>
+<textarea name="instructions" placeholder="Special Instructions (Optional)"></textarea>
+
+<button type="submit">Place Order</button>
+</form>
+
+<button onclick="closeCart()" style="margin-top:10px;background:red;color:white;width:100%;padding:8px;border:none;border-radius:6px;">Close</button>
+
+</div>
+</div>
+
+<script>
+const products = [
+{id:1,name:"Kuyasha (Adult Story Book)",price:899,category:"Dimai",img:"https://i.ibb.co/My4sGMcc/IMG.jpg"},
+{id:2,name:"Padma (Adult Story Book)",price:899,category:"Dimai",img:"https://i.ibb.co/rKj6xYCp/IMG.jpg"},
+{id:3,name:"Dimai Classic Print",price:499,category:"Dimai",img:"https://i.ibb.co/My4sGMcc/IMG.jpg"},
+{id:4,name:"A4 Academic Book",price:599,category:"A4",img:"https://i.ibb.co/rKj6xYCp/IMG.jpg"},
+{id:5,name:"Crown Size Novel",price:699,category:"Crown",img:"https://i.ibb.co/My4sGMcc/IMG.jpg"},
+{id:6,name:"Magazine Print",price:299,category:"Magazine",img:"https://i.ibb.co/rKj6xYCp/IMG.jpg"},
+{id:7,name:"Newspaper Bundle",price:199,category:"Newspaper",img:"https://i.ibb.co/My4sGMcc/IMG.jpg"},
+{id:8,name:"Premium Hardboard Edition",price:999,category:"Dimai",img:"https://i.ibb.co/rKj6xYCp/IMG.jpg"}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function displayProducts(filter="all"){
+  const grid=document.getElementById("productGrid");
+  grid.innerHTML="";
+  products.filter(p=>filter==="all"||p.category===filter)
+  .forEach(p=>{
+    grid.innerHTML+=`
+    <div class="card">
+      <img src="${p.img}" loading="lazy" alt="${p.name}">
+      <h3>${p.name}</h3>
+      <div class="price">₹${p.price}</div>
+      <button onclick="addToCart(${p.id})">Add to Cart</button>
+    </div>`;
+  });
+}
+
+function filterCategory(cat){
+  document.querySelectorAll(".filters button").forEach(btn=>btn.classList.remove("active"));
+  event.target.classList.add("active");
+  displayProducts(cat);
+}
+
+function addToCart(id){
+  const item=cart.find(p=>p.id===id);
+  if(item){item.qty++;}
+  else{
+    const product=products.find(p=>p.id===id);
+    cart.push({...product,qty:1});
+  }
+  saveCart();
+}
+
+function saveCart(){
+  localStorage.setItem("cart",JSON.stringify(cart));
+  document.getElementById("cartCount").innerText=cart.reduce((a,b)=>a+b.qty,0);
+}
+
+function openCart(){
+  document.getElementById("cartModal").style.display="flex";
+  renderCart();
+}
+
+function closeCart(){
+  document.getElementById("cartModal").style.display="none";
+}
+
+function renderCart(){
+  const container=document.getElementById("cartItems");
+  container.innerHTML="";
+  let total=0;
+  cart.forEach(item=>{
+    const sub=item.price*item.qty;
+    total+=sub;
+    container.innerHTML+=`
+    <div class="cart-item">
+      <div>${item.name}<br>₹${item.price} x ${item.qty} = ₹${sub}</div>
+      <div class="qty-controls">
+        <button onclick="changeQty(${item.id},-1)">-</button>
+        <button onclick="changeQty(${item.id},1)">+</button>
+        <button onclick="removeItem(${item.id})">x</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById("grandTotal").innerText="Grand Total: ₹"+total;
+
+  let summary="Order Summary:\n";
+  cart.forEach(i=>{
+    summary+=`${i.name} | Qty:${i.qty} | ₹${i.price*i.qty}\n`;
+  });
+  summary+="Total: ₹"+total;
+  document.getElementById("orderSummary").value=summary;
+}
+
+function changeQty(id,delta){
+  const item=cart.find(p=>p.id===id);
+  item.qty+=delta;
+  if(item.qty<=0) cart=cart.filter(p=>p.id!==id);
+  saveCart();
+  renderCart();
+}
+
+function removeItem(id){
+  cart=cart.filter(p=>p.id!==id);
+  saveCart();
+  renderCart();
+}
+
+document.getElementById("orderForm").addEventListener("submit",function(){
+  setTimeout(()=>{
+    alert("Order placed! BoiGyaniPrinters will contact you on WhatsApp to confirm.");
+    cart=[];
+    saveCart();
+    closeCart();
+  },1000);
+});
+
+saveCart();
+displayProducts();
+</script>
+
+</body>
+</html>
+Initial website upload
